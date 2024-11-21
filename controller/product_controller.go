@@ -3,30 +3,28 @@ package controller
 import (
 	"net/http"
 
-	"github.com/Senhordim/go-api/model"
+	"github.com/Senhordim/go-api/usecase"
 	"github.com/gin-gonic/gin"
 )
 
-type productController struct{}
+type productController struct {
+	productUseCase usecase.ProductUseCase
+}
 
-func NewProductController() productController {
-	return productController{}
+func NewProductController(usecase usecase.ProductUseCase) productController {
+	return productController{
+		productUseCase: usecase,
+	}
 }
 
 func (p *productController) GetProducts(ctx *gin.Context) {
-	products := []model.Product{
-		{
-			ID:          1,
-			Name:        "Laptop",
-			Description: "Lenovo ThinkPad",
-			Price:       500.50,
-		},
-		{
-			ID:          2,
-			Name:        "Nitendo Switch",
-			Description: "Nitendo Switch Console",
-			Price:       1500.81,
-		},
+	products, err := p.productUseCase.GetProducts()
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, products)
